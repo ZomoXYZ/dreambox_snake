@@ -1,5 +1,5 @@
 use std::cmp::min;
-use dbsdk_rs::vdp::{self, Color32};
+use dbsdk_rs::{vdp::{self, Color32}, math::Matrix4x4, field_offset::offset_of};
 
 use rand;
 use draw;
@@ -253,6 +253,11 @@ impl Game {
                 }
             }
         }
+
+        // this should be like the camera
+        let ortho = Matrix4x4::projection_ortho_aspect(640.0 / 480.0, 1.0, 0.0, 1.0);
+        Matrix4x4::load_simd(&ortho);
+        Matrix4x4::transform_vertex_simd(&mut tris, offset_of!(vdp::Vertex => position));
 
         vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
     }
