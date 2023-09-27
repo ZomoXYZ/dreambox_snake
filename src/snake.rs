@@ -51,7 +51,7 @@ impl Game {
             table.push(0);
         }
 
-        Game {
+        let mut game = Game {
             width,
             height,
             table,
@@ -59,7 +59,7 @@ impl Game {
             size: 0,
             last_direction: Direction::Right,
             direction: Direction::Right,
-            head: [left, height-top-1],
+            head: [left, height-top-1], // should this be rng?
 
             interval_frames,
             interval_frame: 0,
@@ -68,7 +68,9 @@ impl Game {
 
             rng: rand::Rng::new(0),
             last_tick: TickResult::Continue,
-        }
+        };
+        let _ = game.new_food(); // rng will be consistent if i call it here
+        return game
     }
 
     pub fn set_direction(&mut self, direction: Direction) {

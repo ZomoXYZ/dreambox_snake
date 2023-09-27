@@ -32,7 +32,7 @@ fn draw(game: &mut snake::Game) {
                     tris.append(&mut t);
                 }
                 snake::Location::Empty => {
-                    
+                    // draw empty grid, also other draw functions for other things
                 }
             }
         }
