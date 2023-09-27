@@ -23,5 +23,5 @@ impl Rng {
 pub fn seed() -> u128 {
     let time = clock::get_time();
     // (time.second as u128) + (time.minute as u128) * 60 + (time.hour as u128) * 60 * 60 + (time.day as u128) * 60 * 60 * 24 + (time.month as u128) * 60 * 60 * 24 * 30 + (time.year as u128) * 60 * 60 * 24 * 30 * 12
-    (time.second + time.minute + time.hour + time.day + time.month) as u128
+    ((time.second + time.minute + time.hour + time.day + time.month) as u128 + 26713) % MAX
 }
