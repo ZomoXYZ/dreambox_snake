@@ -10,38 +10,38 @@ fn box_tris(x: u8, y: u8, size: f32) -> Vec<vdp::Vertex> {
     let top = (y as f32) * size_norm - 1.0;
     let bottom = top + size_norm;
 
-    // let pad = 0.05*size_norm;
+    let pad = 0.05*size_norm;
     // let round = 0.1*size_norm;
 
     vec![
         vdp::Vertex::new(
-            Vector4::new(left, top, 0.0, 1.0),
+            Vector4::new(left+pad, top+pad, 0.0, 1.0),
             Vector4::new(1.0, 0.0, 0.0, 1.0),
             Vector4::zero(),
             Vector4::zero()),
         vdp::Vertex::new(
-            Vector4::new(right, top, 0.0, 1.0),
+            Vector4::new(right-pad, top+pad, 0.0, 1.0),
             Vector4::new(1.0, 0.0, 0.0, 1.0),
             Vector4::zero(),
             Vector4::zero()),
         vdp::Vertex::new(
-            Vector4::new(right, bottom, 0.0, 1.0),
+            Vector4::new(right-pad, bottom-pad, 0.0, 1.0),
             Vector4::new(1.0, 0.0, 0.0, 1.0),
             Vector4::zero(),
             Vector4::zero()),
         
         vdp::Vertex::new(
-            Vector4::new(left, top, 0.0, 1.0),
+            Vector4::new(left+pad, top+pad, 0.0, 1.0),
             Vector4::new(1.0, 0.0, 0.0, 1.0),
             Vector4::zero(),
             Vector4::zero()),
         vdp::Vertex::new(
-            Vector4::new(left, bottom, 0.0, 1.0),
+            Vector4::new(left+pad, bottom-pad, 0.0, 1.0),
             Vector4::new(1.0, 0.0, 0.0, 1.0),
             Vector4::zero(),
             Vector4::zero()),
         vdp::Vertex::new(
-            Vector4::new(right, bottom, 0.0, 1.0),
+            Vector4::new(right-pad, bottom-pad, 0.0, 1.0),
             Vector4::new(1.0, 0.0, 0.0, 1.0),
             Vector4::zero(),
             Vector4::zero()),
@@ -53,10 +53,16 @@ fn tick() {
     vdp::clear_depth(1.0);
 
     // draw a single triangle
-    let triangles = box_tris(0, 0, 1.0);
+    let mut tris = Vec::<vdp::Vertex>::new();
 
+    for x in 0..10 {
+        for y in 0..10 {
+            let mut t = box_tris(x, y, 0.1);
+            tris.append(&mut t);
+        }
+    }
 
-    vdp::draw_geometry(vdp::Topology::TriangleList, &triangles);
+    vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
 }
 
 #[no_mangle]
