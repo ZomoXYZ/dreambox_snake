@@ -1,50 +1,32 @@
 extern crate dbsdk_rs;
-use dbsdk_rs::{vdp::{self, Color32, Vertex}, db};
-use std::cmp::min;
+use dbsdk_rs::{vdp, db, gamepad};
 
 mod draw;
 mod snake;
 mod rand;
 
 static mut GAME: Option<snake::Game> = None;
+static mut CONTROLLER: Option<gamepad::Gamepad> = None;
 
-fn draw(game: &mut snake::Game) {
-    vdp::clear_color(Color32::new(0, 0, 0, 255));
-    vdp::clear_depth(1.0);
+fn tick() {
+    let game = unsafe { GAME.as_mut().unwrap() };
+    let controller = unsafe { CONTROLLER.as_mut().unwrap() };
 
-    let mut tris = Vec::<Vertex>::new();
-
-    let size = 1.0 / (min(game.width, game.height) as f32);
-
-    for x in 0..game.width {
-        for y in 0..game.height {
-            match game.at(x, y) {
-                snake::Location::Head(_) => {
-                    let mut t = draw::box_tris(x, y, size);
-                    tris.append(&mut t);
-                }
-                snake::Location::Body(_) => {
-                    let mut t = draw::box_tris(x, y, size);
-                    tris.append(&mut t);
-                }
-                snake::Location::Food => {
-                    let mut t = draw::box_tris(x, y, size);
-                    tris.append(&mut t);
-                }
-                snake::Location::Empty => {
-                    // draw empty grid, also other draw functions for other things
-                }
-            }
+    if controller.is_connected() {
+        let state = controller.read_state();
+        
+        if state.button_mask.contains(gamepad::GamepadButton::Up) {
+            game.set_direction(snake::Direction::Up);
+        } else if state.button_mask.contains(gamepad::GamepadButton::Down) {
+            game.set_direction(snake::Direction::Down);
+        } else if state.button_mask.contains(gamepad::GamepadButton::Left) {
+            game.set_direction(snake::Direction::Left);
+        } else if state.button_mask.contains(gamepad::GamepadButton::Right) {
+            game.set_direction(snake::Direction::Right);
         }
     }
 
-    vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
-}
-
-fn tick() {
-    unsafe {
-        let game = GAME.as_mut().unwrap();
-        match game.tick() {
+    match game.tick() {
             snake::TickResult::Win(_msg) => {
                 
             }
@@ -52,10 +34,9 @@ fn tick() {
                 
             }
             snake::TickResult::Continue => {
-                draw(game);
+                game.draw();
             }
         }
-    }
 }
 
 #[no_mangle]
@@ -66,6 +47,7 @@ pub fn main(_: i32, _: i32) -> i32 {
     
     unsafe {
         GAME = Some(snake::Game::new(10, 10, 3, 4, 6));
+        CONTROLLER = Some(gamepad::Gamepad::new(gamepad::GamepadSlot::SlotA));
     }
 
     vdp::set_vsync_handler(Some(tick));

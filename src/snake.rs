@@ -1,6 +1,8 @@
-use std::convert::TryInto;
+use std::{convert::TryInto, cmp::min};
+use dbsdk_rs::vdp::{self, Color32};
 
 use rand;
+use draw;
 
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -51,6 +53,7 @@ impl Game {
             table.push(0);
         }
 
+
         let mut game = Game {
             width,
             height,
@@ -59,14 +62,14 @@ impl Game {
             size: 0,
             last_direction: Direction::Right,
             direction: Direction::Right,
-            head: [left, height-top-1], // should this be rng?
+            head: [left-1, height-top], // should this be rng?
 
             interval_frames,
             interval_frame: 0,
             frame: 0,
             tick: 0,
 
-            rng: rand::Rng::new(0),
+            rng: rand::Rng::new(),
             last_tick: TickResult::Continue,
         };
         let _ = game.new_food(); // rng will be consistent if i call it here
@@ -154,11 +157,11 @@ impl Game {
         self.interval_frame = 0;
         self.frame += 1;
 
-        // let result = self.tick_internal();
-        // self.last_tick = result.clone();
-        // result
+        let result = self.tick_internal();
+        self.last_tick = result.clone();
+        result
 
-        TickResult::Continue
+        // TickResult::Continue
     }
 
     fn tick_internal(&mut self) -> TickResult<String, String> {
@@ -204,7 +207,7 @@ impl Game {
         }
 
         // check if we hit food
-        if self.get(self.head[0], self.head[1]) == 0 {
+        if self.get(self.head[0], self.head[1]) < 0 {
             self.size += 1;
             if let Err(str) = self.new_food() {
                 if str == "No space for food" {
@@ -222,5 +225,35 @@ impl Game {
         }
 
         TickResult::Continue
+    }
+
+    pub fn draw(&mut self) {
+        vdp::clear_color(Color32::new(0, 0, 0, 255));
+        vdp::clear_depth(1.0);
+
+        let mut tris = Vec::<vdp::Vertex>::new();
+
+        let size = 1.0 / (min(self.width, self.height) as f32);
+
+        for x in 0..self.width {
+            for y in 0..self.height {
+                match self.at(x, y) {
+                    Location::Head(_) => {
+                        draw::head_box(&mut tris, x, y, size)
+                    }
+                    Location::Body(_) => {
+                        draw::body_box(&mut tris, x, y, size)
+                    }
+                    Location::Food => {
+                        draw::food_box(&mut tris, x, y, size);
+                    }
+                    Location::Empty => {
+                        draw::empty_box(&mut tris, x, y, size);
+                    }
+                }
+            }
+        }
+
+        vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
     }
 }
