@@ -1,4 +1,4 @@
-use std::{convert::TryInto, cmp::min};
+use std::cmp::min;
 use dbsdk_rs::vdp::{self, Color32};
 
 use rand;
@@ -59,7 +59,7 @@ impl Game {
             height,
             table,
             
-            size: 0,
+            size: 1,
             last_direction: Direction::Right,
             direction: Direction::Right,
             head: [left-1, height-top], // should this be rng?
@@ -166,7 +166,7 @@ impl Game {
 
     fn tick_internal(&mut self) -> TickResult<String, String> {
         // set head
-        self.set(self.head[0], self.head[1], self.size.try_into().unwrap());
+        self.set(self.head[0], self.head[1], self.size as i16);
 
         // move head
         match self.direction {
