@@ -1,5 +1,6 @@
-use std::time::{Duration, Instant};
-use getrandom::getrandom;
+use std::convert::TryInto;
+
+use rand;
 
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -10,33 +11,45 @@ pub enum Direction {
 }
 
 pub struct Game {
-    width: u8,
-    height: u8,
-    table: Vec<i32>,
+    pub width: u8,
+    pub height: u8,
+    table: Vec<i16>,
     
-    size: u16,
+    pub size: u16,
     last_direction: Direction,
     direction: Direction,
-    head: [u8; 2],
+    pub head: [u8; 2],
 
-    interval_ms: f32,
-    last_tick: Instant,
+    interval_frames: u32,
+    interval_frame: u32,
+    frame: u32,
+    tick: u32,
+
+    rng: rand::Rng,
+    last_tick: TickResult<String, String>,
 }
 
-enum TickResult<T, E> {
-    Win(T),
-    Lose(E),
+#[derive(Clone)]
+pub enum TickResult<W, L> {
+    Win(W),
+    Lose(L),
     Continue
 }
 
+#[derive(Clone)]
+pub enum Location {
+    Head(u16),
+    Body(u16),
+    Food,
+    Empty,
+}
+
 impl Game {
-    pub fn new(width: u8, height: u8, interval_ms: f32) -> Game {
+    pub fn new(width: u8, height: u8, left: u8, top: u8, interval_frames: u32) -> Game {
         let mut table = Vec::with_capacity((width * height).into());
         for _ in 0..width*height {
             table.push(0);
         }
-
-        let last_tick = Instant::now();
 
         Game {
             width,
@@ -46,10 +59,15 @@ impl Game {
             size: 0,
             last_direction: Direction::Right,
             direction: Direction::Right,
-            head: [0, 0],
+            head: [left, height-top-1],
 
-            interval_ms,
-            last_tick,
+            interval_frames,
+            interval_frame: 0,
+            frame: 0,
+            tick: 0,
+
+            rng: rand::Rng::new(0),
+            last_tick: TickResult::Continue,
         }
     }
 
@@ -70,27 +88,39 @@ impl Game {
         self.direction = direction;
     }
 
+    pub fn at(&self, x: u8, y: u8) -> Location {
+        if x == self.head[0] && y == self.head[1] {
+            return Location::Head(self.size)
+        }
+        let val = self.get(x, y);
+        if val == -1 {
+            return Location::Food
+        }
+        if val > 0 {
+            return Location::Body(val as u16)
+        }
+        Location::Empty
+    }
+
     fn get_index(&self, x: u8, y: u8) -> usize {
         if x >= self.width || y >= self.height {
             return 0
         }
         (y as usize) * (self.width as usize) + (x as usize)
     }
-    fn get(&self, x: u8, y: u8) -> i32 {
+    fn get(&self, x: u8, y: u8) -> i16 {
         self.table[self.get_index(x, y)]
     }
-    fn set(&mut self, x: u8, y: u8, value: i32) {
+    fn set(&mut self, x: u8, y: u8, value: i16) {
         let index = self.get_index(x, y);
         self.table[index] = value;
     }
 
     fn new_food(&mut self) -> Result<(), &str> {
-        let mut pos: [u8; 2] = [0, 0];
-        if let Err(s) = getrandom(&mut pos) {
-            return Err("Failed to get random")
-        }
+        let x = self.rng.random(self.width);
+        let y = self.rng.random(self.height);
 
-        let index = self.get_index(pos[0], pos[1]);
+        let index = self.get_index(x, y);
         let mut off = 0;
 
         loop {
@@ -108,13 +138,30 @@ impl Game {
         Ok(())
     }
 
-    fn tick(&mut self) -> TickResult<&str, &str> {
-        if self.last_tick.elapsed() < Duration::from_millis(self.interval_ms as u64) {
-            return TickResult::Continue
+    pub fn tick(&mut self) -> TickResult<String, String> {
+        self.tick += 1;
+
+        if !matches!(self.last_tick, TickResult::Continue) {
+            return self.last_tick.clone()
         }
 
+        if self.interval_frame < self.interval_frames {
+            self.interval_frame += 1;
+            return TickResult::Continue
+        }
+        self.interval_frame = 0;
+        self.frame += 1;
+
+        // let result = self.tick_internal();
+        // self.last_tick = result.clone();
+        // result
+
+        TickResult::Continue
+    }
+
+    fn tick_internal(&mut self) -> TickResult<String, String> {
         // set head
-        self.set(self.head[0], self.head[1], self.size.into());
+        self.set(self.head[0], self.head[1], self.size.try_into().unwrap());
 
         // move head
         match self.direction {
@@ -148,11 +195,10 @@ impl Game {
             },
         }
         self.last_direction = self.direction;
-        self.last_tick = Instant::now();
 
         // check if we hit ourselves
         if self.get(self.head[0], self.head[1]) > 0 {
-            return TickResult::Lose("Ouroboros")
+            return TickResult::Lose("Ouroboros".to_owned())
         }
 
         // check if we hit food
@@ -160,9 +206,9 @@ impl Game {
             self.size += 1;
             if let Err(str) = self.new_food() {
                 if str == "No space for food" {
-                    return TickResult::Win("Yummers")
+                    return TickResult::Win("Yummers".to_owned())
                 }
-                return TickResult::Lose("Garbage")
+                return TickResult::Lose("Garbage".to_owned())
             }
         } else {
             // decay snake

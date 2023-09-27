@@ -1,25 +1,61 @@
 extern crate dbsdk_rs;
-extern crate getrandom;
 use dbsdk_rs::{vdp::{self, Color32, Vertex}, db};
+use std::cmp::min;
 
 mod draw;
-// mod snake;
+mod snake;
+mod rand;
 
-fn tick() {
+static mut GAME: Option<snake::Game> = None;
+
+fn draw(game: &mut snake::Game) {
     vdp::clear_color(Color32::new(0, 0, 0, 255));
     vdp::clear_depth(1.0);
 
-    // draw a single triangle
     let mut tris = Vec::<Vertex>::new();
 
-    for x in 0..10 {
-        for y in 0..10 {
-            let mut t = draw::box_tris(x, y, 0.1);
-            tris.append(&mut t);
+    let size = 1.0 / (min(game.width, game.height) as f32);
+
+    for x in 0..game.width {
+        for y in 0..game.height {
+            match game.at(x, y) {
+                snake::Location::Head(_) => {
+                    let mut t = draw::box_tris(x, y, size);
+                    tris.append(&mut t);
+                }
+                snake::Location::Body(_) => {
+                    let mut t = draw::box_tris(x, y, size);
+                    tris.append(&mut t);
+                }
+                snake::Location::Food => {
+                    let mut t = draw::box_tris(x, y, size);
+                    tris.append(&mut t);
+                }
+                snake::Location::Empty => {
+                    
+                }
+            }
         }
     }
 
     vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
+}
+
+fn tick() {
+    unsafe {
+        let game = GAME.as_mut().unwrap();
+        match game.tick() {
+            snake::TickResult::Win(_msg) => {
+                
+            }
+            snake::TickResult::Lose(_msg) => {
+                
+            }
+            snake::TickResult::Continue => {
+                draw(game);
+            }
+        }
+    }
 }
 
 #[no_mangle]
@@ -28,11 +64,11 @@ pub fn main(_: i32, _: i32) -> i32 {
     vdp::depth_write(true);
     vdp::depth_func(vdp::Compare::LessOrEqual);
     
-    // let snake = snake::Game::new(10, 10, 1000.0/15.0);
+    unsafe {
+        GAME = Some(snake::Game::new(10, 10, 3, 4, 6));
+    }
 
     vdp::set_vsync_handler(Some(tick));
-
-    // tick();
 
     return 0;
 }
