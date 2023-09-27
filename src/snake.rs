@@ -171,17 +171,17 @@ impl Game {
         // move head
         match self.direction {
             Direction::Up => {
-                if self.head[1] == 0 {
-                    self.head[1] = self.height - 1;
-                } else {
-                    self.head[1] -= 1;
-                }
-            },
-            Direction::Down => {
                 if self.head[1] == self.height - 1 {
                     self.head[1] = 0;
                 } else {
                     self.head[1] += 1;
+                }
+            },
+            Direction::Down => {
+                if self.head[1] == 0 {
+                    self.head[1] = self.height - 1;
+                } else {
+                    self.head[1] -= 1;
                 }
             },
             Direction::Left => {

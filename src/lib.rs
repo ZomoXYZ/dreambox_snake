@@ -12,9 +12,10 @@ fn tick() {
     let game = unsafe { GAME.as_mut().unwrap() };
     let controller = unsafe { CONTROLLER.as_mut().unwrap() };
 
+    // this uses the controller only, can i use keyboard?
     if controller.is_connected() {
         let state = controller.read_state();
-        
+
         if state.button_mask.contains(gamepad::GamepadButton::Up) {
             game.set_direction(snake::Direction::Up);
         } else if state.button_mask.contains(gamepad::GamepadButton::Down) {
@@ -27,16 +28,16 @@ fn tick() {
     }
 
     match game.tick() {
-            snake::TickResult::Win(_msg) => {
-                
-            }
-            snake::TickResult::Lose(_msg) => {
-                
-            }
-            snake::TickResult::Continue => {
-                game.draw();
-            }
+        snake::TickResult::Win(_msg) => {
+            
         }
+        snake::TickResult::Lose(_msg) => {
+            
+        }
+        snake::TickResult::Continue => {
+            game.draw();
+        }
+    }
 }
 
 #[no_mangle]
