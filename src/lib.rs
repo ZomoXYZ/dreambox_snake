@@ -32,7 +32,7 @@ fn tick() {
             
         }
         snake::TickResult::Lose(_msg) => {
-            
+            game.reset();
         }
         snake::TickResult::Continue => {
             game.draw();

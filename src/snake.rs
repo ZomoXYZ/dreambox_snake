@@ -1,5 +1,5 @@
 use std::cmp::min;
-use dbsdk_rs::{vdp::{self, Color32}, math::Matrix4x4, field_offset::offset_of};
+use dbsdk_rs::vdp::{self, Color32};
 
 use rand;
 use draw;
@@ -74,6 +74,22 @@ impl Game {
         };
         let _ = game.new_food(); // rng will be consistent if i call it here
         return game
+    }
+
+    pub fn reset(&mut self) {
+        self.size = 1;
+        self.last_direction = Direction::Right;
+        self.direction = Direction::Right;
+        self.head = [self.width/2, self.height/2];
+        self.interval_frame = 0;
+        self.frame = 0;
+        self.tick = 0;
+        self.last_tick = TickResult::Continue;
+        self.table = Vec::with_capacity((self.width * self.height).into());
+        for _ in 0..self.width*self.height {
+            self.table.push(0);
+        }
+        let _ = self.new_food();
     }
 
     pub fn set_direction(&mut self, direction: Direction) {
@@ -239,26 +255,21 @@ impl Game {
             for y in 0..self.height {
                 match self.at(x, y) {
                     Location::Head(_) => {
-                        draw::head_box(&mut tris, x, y, size)
+                        draw::head_box(&mut tris, x, y, size, 0.0);
                     }
                     Location::Body(_) => {
-                        draw::body_box(&mut tris, x, y, size)
+                        draw::body_box(&mut tris, x, y, size, 0.0);
                     }
                     Location::Food => {
-                        draw::food_box(&mut tris, x, y, size);
+                        draw::food_box(&mut tris, x, y, size, 0.0);
                     }
                     Location::Empty => {
-                        draw::empty_box(&mut tris, x, y, size);
+                        draw::empty_box(&mut tris, x, y, size, 0.0);
                     }
                 }
             }
         }
-
-        // this should be like the camera
-        let ortho = Matrix4x4::projection_ortho_aspect(640.0 / 480.0, 1.0, 0.0, 1.0);
-        Matrix4x4::load_simd(&ortho);
-        Matrix4x4::transform_vertex_simd(&mut tris, offset_of!(vdp::Vertex => position));
-
-        vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
+        
+        draw::transform_draw_tris(&mut tris)
     }
 }
