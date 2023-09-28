@@ -15,7 +15,7 @@ impl Rng {
 
     pub fn random(&mut self, max: u8) -> u8 {
         let seed = self.seed.pow(2) % MAX;
-        self.seed = seed;
+        self.seed = seed >> 2;
         (seed % (max as u128)) as u8
     }
 }
