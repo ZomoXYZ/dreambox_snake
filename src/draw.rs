@@ -3,21 +3,21 @@ use dbsdk_rs::field_offset::offset_of;
 use dbsdk_rs::vdp;
 use dbsdk_rs::math::{Vector4, Matrix4x4, Vector3, Quaternion};
 
-pub fn transform_draw_tris(tris: &mut Vec<vdp::Vertex>) {
+pub fn transform_draw_tris(tris: &mut Vec<vdp::Vertex>, _frame: u32, _tick: u32) {
     Matrix4x4::load_identity_simd();
 
-    let s = 50.0;
+    let rotation = Matrix4x4::rotation(Quaternion::new(-0.34, 0.0, 0.05, 1.0));
+    Matrix4x4::mul_simd(&rotation);
+
+    let s = 20.0;
     let scale = Matrix4x4::scale(Vector3::new(s,s,s));
     Matrix4x4::mul_simd(&scale);
 
-    let rotation = Matrix4x4::rotation(Quaternion::new(-0.18, 0.0, 0.05, 1.0));
-    Matrix4x4::mul_simd(&rotation);
-
-    let position = Matrix4x4::translation(Vector3::new(0.0, 1.0, -40.0));
+    let position = Matrix4x4::translation(Vector3::new(0.0, 1.0, -50.0));
     Matrix4x4::mul_simd(&position);
 
-    let proj = Matrix4x4::projection_perspective(640.0 / 480.0, 40.0, 0.1, 100.0);
-    Matrix4x4::mul_simd(&proj);
+    let projection = Matrix4x4::projection_perspective(640.0 / 480.0, 1.0, 0.1, 200.0);
+    Matrix4x4::mul_simd(&projection);
 
     Matrix4x4::transform_vertex_simd(tris, offset_of!(vdp::Vertex => position));
 

@@ -78,8 +78,8 @@ impl Game {
 
     pub fn reset(&mut self) {
         self.size = 1;
-        self.last_direction = Direction::Right;
-        self.direction = Direction::Right;
+        // self.last_direction = Direction::Right;
+        // self.direction = Direction::Right;
         self.head = [self.width/2, self.height/2];
         self.interval_frame = 0;
         self.frame = 0;
@@ -270,6 +270,6 @@ impl Game {
             }
         }
         
-        draw::transform_draw_tris(&mut tris)
+        draw::transform_draw_tris(&mut tris, self.frame, self.tick)
     }
 }
