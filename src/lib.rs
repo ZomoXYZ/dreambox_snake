@@ -5,6 +5,7 @@ mod draw;
 mod snake;
 mod rng;
 mod geometry;
+mod util;
 
 static mut GAME: Option<snake::Game> = None;
 static mut CONTROLLER: Option<gamepad::Gamepad> = None;

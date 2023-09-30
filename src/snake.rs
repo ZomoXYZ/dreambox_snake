@@ -1,4 +1,4 @@
-use std::cmp::min;
+use std::cmp::max;
 use dbsdk_rs::vdp::{self, Color32};
 
 use rng;
@@ -248,46 +248,48 @@ impl Game {
 
         let mut tris = Vec::<vdp::Vertex>::new();
 
-        let size = 1.0 / (min(self.width, self.height) as f32);
+        let size = 1.0 / (max(self.width, self.height) as f32);
 
         for x in 0..self.width {
             for y in 0..self.height {
                 match self.at(x, y) {
                     Location::Head(_) => {
-                        draw::head_box(&mut tris, x, y, size, 0.0);
+                        let scale = if self.size == 1 { 0.6 } else if self.size == 2 { 0.6 } else if self.size == 3 { 0.8 } else { 1.0 };
+                        draw::head_box(&mut tris, x, y, 0.0, size, scale);
                         if x == 0 {
-                            draw::head_prediction_box(&mut tris, self.width as i8, y as i8, size, 0.0);
+                            draw::head_prediction_box(&mut tris, self.width as i8, y as i8, 0.0, size);
                         }
                         if y == 0 {
-                            draw::head_prediction_box(&mut tris, x as i8, self.height as i8, size, 0.0);
+                            draw::head_prediction_box(&mut tris, x as i8, self.height as i8, 0.0, size);
                         }
                         if x == self.width - 1 {
-                            draw::head_prediction_box(&mut tris, -1, y as i8, size, 0.0);
+                            draw::head_prediction_box(&mut tris, -1, y as i8, 0.0, size);
                         }
                         if y == self.height - 1 {
-                            draw::head_prediction_box(&mut tris, x as i8, -1, size, 0.0);
+                            draw::head_prediction_box(&mut tris, x as i8, -1, 0.0, size);
                         }
                     }
-                    Location::Body(_) => {
-                        draw::body_box(&mut tris, x, y, size, 0.0);
+                    Location::Body(val) => {
+                        let scale = if val == 1 { 0.2 } else if val == 2 { 0.5 } else if val == 3 { 0.9 } else { 1.0 };
+                        draw::body_box(&mut tris, x, y, 0.0, size, scale);
                         if x == 0 {
-                            draw::body_prediction_box(&mut tris, self.width as i8, y as i8, size, 0.0);
+                            draw::body_prediction_box(&mut tris, self.width as i8, y as i8, 0.0, size);
                         }
                         if y == 0 {
-                            draw::body_prediction_box(&mut tris, x as i8, self.height as i8, size, 0.0);
+                            draw::body_prediction_box(&mut tris, x as i8, self.height as i8, 0.0, size);
                         }
                         if x == self.width - 1 {
-                            draw::body_prediction_box(&mut tris, -1, y as i8, size, 0.0);
+                            draw::body_prediction_box(&mut tris, -1, y as i8, 0.0, size);
                         }
                         if y == self.height - 1 {
-                            draw::body_prediction_box(&mut tris, x as i8, -1, size, 0.0);
+                            draw::body_prediction_box(&mut tris, x as i8, -1, 0.0, size);
                         }
                     }
                     Location::Food => {
-                        draw::food_box(&mut tris, x, y, size, 0.0);
+                        draw::food_box(&mut tris, x, y, 0.0, size);
                     }
                     Location::Empty => {
-                        draw::empty_box(&mut tris, x, y, size, 0.0);
+                        draw::empty_box(&mut tris, x, y, 0.0, size);
                     }
                 }
             }
