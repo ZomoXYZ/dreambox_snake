@@ -30,7 +30,7 @@ pub fn transform_draw_tris(tris: &mut Vec<vdp::Vertex>, _frame: u32, _tick: u32)
     vdp::draw_geometry(vdp::Topology::TriangleList, &tris);
 }
 
-pub fn empty_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32) {
+pub fn floor_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32, color: Vector4) {
     let from = vec3(
         x * size,
         y * size,
@@ -42,7 +42,6 @@ pub fn empty_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32
         z * size
     );
     let scale = vec3_from(0.9);
-    let color = Vector4::new(0.3, 0.3, 0.3, 0.1);
 
     let square = Square::new(from, to, scale, color, CENTER);
     other.append(&mut square.tris());

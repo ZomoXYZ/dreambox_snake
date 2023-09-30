@@ -1,5 +1,5 @@
 use std::cmp::max;
-use dbsdk_rs::vdp::{self, Color32};
+use dbsdk_rs::{vdp, math::Vector4};
 
 use rng;
 use draw;
@@ -245,7 +245,7 @@ impl Game {
     }
 
     pub fn draw(&self) {
-        vdp::clear_color(Color32::new(0, 0, 0, 255));
+        vdp::clear_color(vdp::Color32::new(0, 0, 0, 255));
         vdp::clear_depth(1.0);
 
         let mut tris = Vec::<vdp::Vertex>::new();
@@ -256,6 +256,7 @@ impl Game {
             for y in 0..self.height {
                 match self.at(x, y) {
                     Location::Head(_) => {
+                        draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
                         let scale = if self.size == 1 { 0.6 } else if self.size == 2 { 0.6 } else if self.size == 3 { 0.8 } else { 1.0 };
                         draw::body_box(&mut tris, true, x as f32, y as f32, 0.0, size, scale);
                         if x == 0 {
@@ -272,6 +273,7 @@ impl Game {
                         }
                     }
                     Location::Body(val) => {
+                        draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
                         let scale: f32 = if val == 1 { 0.4 } else if val == 2 { 0.65 } else if val == 3 { 0.9 } else { 1.0 };
                         draw::body_box(&mut tris, false, x as f32, y as f32, 0.0, size, scale);
                         if x == 0 {
@@ -288,10 +290,11 @@ impl Game {
                         }
                     }
                     Location::Food => {
+                        draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
                         draw::food_box(&mut tris, x as f32, y as f32, 0.0, size);
                     }
                     Location::Empty => {
-                        draw::empty_box(&mut tris, x as f32, y as f32, 0.0, size);
+                        draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.25, 0.25, 0.25, 1.0));
                     }
                 }
             }
