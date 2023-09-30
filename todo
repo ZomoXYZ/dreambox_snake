@@ -1,0 +1,6 @@
+- improve rng
+    - i keep getting the same numbers so snake keeps eating like 4 in a row when facing right
+- animation system (?)
+    - something to let the small boxes seem floaty
+    - and the camera, the world should feel floaty like you're in space, ethereal
+- blank spot should look better
