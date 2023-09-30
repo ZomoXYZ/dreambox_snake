@@ -27,7 +27,7 @@ pub struct Game {
     frame: u32,
     tick: u32,
 
-    rng: rng::Rng,
+    rng: rng::RngSM64,
     last_tick: TickResult<String, String>,
 }
 
@@ -69,7 +69,7 @@ impl Game {
             frame: 0,
             tick: 0,
 
-            rng: rng::Rng::new(),
+            rng: rng::RngSM64::new(),
             last_tick: TickResult::Continue,
         };
         let _ = game.new_food(); // rng will be consistent if i call it here
@@ -138,10 +138,9 @@ impl Game {
     }
 
     fn new_food(&mut self) -> Result<(), &str> {
-        let x = self.rng.random(self.width);
-        let y = self.rng.random(self.height);
+        let pos = self.rng.random(self.width);
 
-        let index = self.get_index(x, y);
+        let index = self.get_index(pos[0], pos[1]);
         let mut off = 0;
 
         loop {

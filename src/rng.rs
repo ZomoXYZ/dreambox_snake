@@ -1,27 +1,46 @@
 use dbsdk_rs::clock;
 
-static MAX: u128 = 0xFFFFFFFF;
-
-pub struct Rng {
-    seed: u128,
+pub fn seeds() -> [u8; 2] {
+    let time = clock::get_time();
+    [
+        time.second + time.minute + time.hour + time.day + time.month,
+        (time.second & time.minute) + time.hour + (time.day | time.month)
+    ]
 }
 
-impl Rng {
-    pub fn new() -> Rng {
-        Rng {
-            seed: seed(),
+/*
+sm64 rng
+https://youtu.be/q15yNrJHOak?t=292
+*/
+pub struct RngSM64 {
+    seeds: [u8; 2]
+}
+
+impl RngSM64 {
+    pub fn new() -> RngSM64 {
+        RngSM64 {
+            seeds: seeds(),
         }
     }
 
-    pub fn random(&mut self, max: u8) -> u8 {
-        let seed = self.seed.pow(2) % MAX;
-        self.seed = seed >> 2;
-        (seed % (max as u128)) as u8
-    }
-}
+    pub fn random(&mut self, max: u8) -> [u8; 2] {
+        let mut num: [u8; 2] = [0, 0];
 
-pub fn seed() -> u128 {
-    let time = clock::get_time();
-    // (time.second as u128) + (time.minute as u128) * 60 + (time.hour as u128) * 60 * 60 + (time.day as u128) * 60 * 60 * 24 + (time.month as u128) * 60 * 60 * 24 * 30 + (time.year as u128) * 60 * 60 * 24 * 30 * 12
-    ((time.second + time.minute + time.hour + time.day + time.month) as u128 + 26713) % MAX
+        self.tick();
+        num[0] = (self.seeds[0] ^ self.seeds[1]) % max;
+        self.tick();
+        num[1] = (self.seeds[0] ^ self.seeds[1]) % max;
+
+        num
+    }
+
+    fn tick(&mut self) {
+        self.seeds[0] = self.seeds[0].wrapping_mul(5).wrapping_add(1);
+
+        let bit4 = self.seeds[1] & 8 == 8;
+        let bit7 = self.seeds[1] & 64 == 64;
+        let odd = if bit4 == bit7 { 1 } else { 0 };
+        
+        self.seeds[1] = self.seeds[1].wrapping_mul(2).wrapping_add(odd)
+    }
 }
