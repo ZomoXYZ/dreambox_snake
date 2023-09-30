@@ -3,7 +3,7 @@ use dbsdk_rs::{vdp, db, gamepad};
 
 mod draw;
 mod snake;
-mod rand;
+mod rng;
 mod geometry;
 
 static mut GAME: Option<snake::Game> = None;
