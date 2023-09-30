@@ -4,7 +4,7 @@ use dbsdk_rs::field_offset::offset_of;
 use dbsdk_rs::vdp;
 use dbsdk_rs::math::{Vector4, Matrix4x4, Vector3, Quaternion};
 
-use geometry;
+use geometry::cube::{Cube, CubeWeight, square_tris};
 
 use crate::util::vec3_from;
 
@@ -36,7 +36,7 @@ pub fn empty_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, z: f32, size: f32) 
 
     let padding = 0.05 * size;
     
-    let mut tris = geometry::square_tris([
+    let mut tris = square_tris([
         Vector4::new(left+padding, top+padding, z, 1.0),
         Vector4::new(right-padding, top+padding, z, 1.0),
         Vector4::new(right-padding, bottom-padding, z, 1.0),
@@ -57,7 +57,7 @@ pub fn food_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, z: f32, size: f32) {
     let scale = vec3_from(1.0 / 3.0);
     let color = Vector4::new(1.0, 0.0, 0.0, 1.0);
 
-    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, scale, color, geometry::CubeWeight::Center);
+    let c = Cube::new(x1, x2, y1, y2, z1, z2, scale, color, CubeWeight::Center);
     other.append(&mut c.tris());
 }
 
@@ -72,7 +72,7 @@ pub fn head_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, z: f32, size: f32, s
     let scale = vec3_from(0.95 * scale);
     let color = Vector4::new(0.4, 1.0, 0.4, 1.0);
 
-    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, scale, color, geometry::CubeWeight::Z1);
+    let c = Cube::new(x1, x2, y1, y2, z1, z2, scale, color, CubeWeight::Z1);
     other.append(&mut c.tris());
 }
 
@@ -87,7 +87,7 @@ pub fn head_prediction_box(other: &mut Vec<vdp::Vertex>, x: i8, y: i8, z: f32, s
     let scale = vec3_from(0.5);
     let color = Vector4::new(0.5, 1.0, 0.5, 1.0);
 
-    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, scale, color, geometry::CubeWeight::Z1);
+    let c = Cube::new(x1, x2, y1, y2, z1, z2, scale, color, CubeWeight::Z1);
     other.append(&mut c.tris());
 }
 
@@ -102,7 +102,7 @@ pub fn body_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, z: f32, size: f32, s
     let scale = vec3_from(0.85 * scale);
     let color = Vector4::new(0.0, 1.0, 0.0, 1.0);
 
-    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, scale, color, geometry::CubeWeight::Z1);
+    let c = Cube::new(x1, x2, y1, y2, z1, z2, scale, color, CubeWeight::Z1);
     other.append(&mut c.tris());
 }
 
@@ -117,6 +117,6 @@ pub fn body_prediction_box(other: &mut Vec<vdp::Vertex>, x: i8, y: i8, z: f32, s
     let scale = vec3_from(0.5);
     let color = Vector4::new(0.0, 1.0, 0.0, 1.0);
 
-    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, scale, color, geometry::CubeWeight::Z1);
+    let c = Cube::new(x1, x2, y1, y2, z1, z2, scale, color, CubeWeight::Z1);
     other.append(&mut c.tris());
 }
