@@ -243,7 +243,7 @@ impl Game {
         TickResult::Continue
     }
 
-    pub fn draw(&mut self) {
+    pub fn draw(&self) {
         vdp::clear_color(Color32::new(0, 0, 0, 255));
         vdp::clear_depth(1.0);
 
@@ -256,9 +256,33 @@ impl Game {
                 match self.at(x, y) {
                     Location::Head(_) => {
                         draw::head_box(&mut tris, x, y, size, 0.0);
+                        if x == 0 {
+                            draw::head_prediction_box(&mut tris, self.width as i8, y as i8, size, 0.0);
+                        }
+                        if y == 0 {
+                            draw::head_prediction_box(&mut tris, x as i8, self.height as i8, size, 0.0);
+                        }
+                        if x == self.width - 1 {
+                            draw::head_prediction_box(&mut tris, -1, y as i8, size, 0.0);
+                        }
+                        if y == self.height - 1 {
+                            draw::head_prediction_box(&mut tris, x as i8, -1, size, 0.0);
+                        }
                     }
                     Location::Body(_) => {
                         draw::body_box(&mut tris, x, y, size, 0.0);
+                        if x == 0 {
+                            draw::body_prediction_box(&mut tris, self.width as i8, y as i8, size, 0.0);
+                        }
+                        if y == 0 {
+                            draw::body_prediction_box(&mut tris, x as i8, self.height as i8, size, 0.0);
+                        }
+                        if x == self.width - 1 {
+                            draw::body_prediction_box(&mut tris, -1, y as i8, size, 0.0);
+                        }
+                        if y == self.height - 1 {
+                            draw::body_prediction_box(&mut tris, x as i8, -1, size, 0.0);
+                        }
                     }
                     Location::Food => {
                         draw::food_box(&mut tris, x, y, size, 0.0);

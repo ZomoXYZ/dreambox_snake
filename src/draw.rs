@@ -82,6 +82,24 @@ pub fn head_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, size: f32, z: f32) {
     other.append(&mut c.tris());
 }
 
+pub fn head_prediction_box(other: &mut Vec<vdp::Vertex>, x: i8, y: i8, size: f32, z: f32) {
+    let size_norm = size*2.0; // size=[0,1], so size_norm=[0,2] for [-1,1]
+
+    let x1 = (x as f32) * size_norm - 1.0;
+    let x2 = x1 + size_norm;
+    let y1 = (y as f32) * size_norm - 1.0;
+    let y2 = y1 + size_norm;
+
+    let z1 = z;
+    let z2 = z + size_norm;
+
+    let padding = size_norm/4.0;
+    let color = Vector4::new(0.5, 1.0, 0.5, 1.0);
+
+    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, padding, color, geometry::CubeWeight::Z1);
+    other.append(&mut c.tris());
+}
+
 pub fn body_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, size: f32, z: f32) {
     let size_norm = size*2.0; // size=[0,1], so size_norm=[0,2] for [-1,1]
 
@@ -94,6 +112,24 @@ pub fn body_box(other: &mut Vec<vdp::Vertex>, x: u8, y: u8, size: f32, z: f32) {
     let z2 = z + size_norm;
 
     let padding = 0.05*size_norm;
+    let color = Vector4::new(0.0, 1.0, 0.0, 1.0);
+
+    let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, padding, color, geometry::CubeWeight::Z1);
+    other.append(&mut c.tris());
+}
+
+pub fn body_prediction_box(other: &mut Vec<vdp::Vertex>, x: i8, y: i8, size: f32, z: f32) {
+    let size_norm = size*2.0; // size=[0,1], so size_norm=[0,2] for [-1,1]
+
+    let x1 = (x as f32) * size_norm - 1.0;
+    let x2 = x1 + size_norm;
+    let y1 = (y as f32) * size_norm - 1.0;
+    let y2 = y1 + size_norm;
+
+    let z1 = z;
+    let z2 = z + size_norm;
+
+    let padding = size_norm/4.0;
     let color = Vector4::new(0.0, 1.0, 0.0, 1.0);
 
     let c = geometry::Cube::new(x1, x2, y1, y2, z1, z2, padding, color, geometry::CubeWeight::Z1);
