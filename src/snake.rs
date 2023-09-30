@@ -4,6 +4,8 @@ use dbsdk_rs::vdp::{self, Color32};
 use rng;
 use draw;
 
+use crate::util::vec3;
+
 #[derive(Clone, Copy)]
 pub enum Direction {
     Up,
@@ -255,41 +257,41 @@ impl Game {
                 match self.at(x, y) {
                     Location::Head(_) => {
                         let scale = if self.size == 1 { 0.6 } else if self.size == 2 { 0.6 } else if self.size == 3 { 0.8 } else { 1.0 };
-                        draw::head_box(&mut tris, x, y, 0.0, size, scale);
+                        draw::body_box(&mut tris, true, x as f32, y as f32, 0.0, size, scale);
                         if x == 0 {
-                            draw::head_prediction_box(&mut tris, self.width as i8, y as i8, 0.0, size);
+                            draw::body_prediction_box(&mut tris, true, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0));
                         }
                         if y == 0 {
-                            draw::head_prediction_box(&mut tris, x as i8, self.height as i8, 0.0, size);
+                            draw::body_prediction_box(&mut tris, true, x as f32, self.height as f32, 0.0, size, vec3(0.5, 0.0, 0.0));
                         }
                         if x == self.width - 1 {
-                            draw::head_prediction_box(&mut tris, -1, y as i8, 0.0, size);
+                            draw::body_prediction_box(&mut tris, true, -1.0, y as f32, 0.0, size, vec3(1.0, 0.5, 0.0));
                         }
                         if y == self.height - 1 {
-                            draw::head_prediction_box(&mut tris, x as i8, -1, 0.0, size);
+                            draw::body_prediction_box(&mut tris, true, x as f32, -1.0, 0.0, size, vec3(0.5, 1.0, 0.0));
                         }
                     }
                     Location::Body(val) => {
-                        let scale = if val == 1 { 0.2 } else if val == 2 { 0.5 } else if val == 3 { 0.9 } else { 1.0 };
-                        draw::body_box(&mut tris, x, y, 0.0, size, scale);
+                        let scale: f32 = if val == 1 { 0.4 } else if val == 2 { 0.65 } else if val == 3 { 0.9 } else { 1.0 };
+                        draw::body_box(&mut tris, false, x as f32, y as f32, 0.0, size, scale);
                         if x == 0 {
-                            draw::body_prediction_box(&mut tris, self.width as i8, y as i8, 0.0, size);
+                            draw::body_prediction_box(&mut tris, false, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0));
                         }
                         if y == 0 {
-                            draw::body_prediction_box(&mut tris, x as i8, self.height as i8, 0.0, size);
+                            draw::body_prediction_box(&mut tris, false, x as f32, self.height as f32, 0.0, size, vec3(0.5, 0.0, 0.0));
                         }
                         if x == self.width - 1 {
-                            draw::body_prediction_box(&mut tris, -1, y as i8, 0.0, size);
+                            draw::body_prediction_box(&mut tris, false, -1.0, y as f32, 0.0, size, vec3(1.0, 0.5, 0.0));
                         }
                         if y == self.height - 1 {
-                            draw::body_prediction_box(&mut tris, x as i8, -1, 0.0, size);
+                            draw::body_prediction_box(&mut tris, false, x as f32, -1.0, 0.0, size, vec3(0.5, 1.0, 0.0));
                         }
                     }
                     Location::Food => {
-                        draw::food_box(&mut tris, x, y, 0.0, size);
+                        draw::food_box(&mut tris, x as f32, y as f32, 0.0, size);
                     }
                     Location::Empty => {
-                        draw::empty_box(&mut tris, x, y, 0.0, size);
+                        draw::empty_box(&mut tris, x as f32, y as f32, 0.0, size);
                     }
                 }
             }
