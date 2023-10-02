@@ -12,13 +12,13 @@ pub fn seeds() -> [u8; 2] {
 sm64 rng
 https://youtu.be/q15yNrJHOak?t=292
 */
-pub struct RngSM64 {
+pub struct Rng {
     seeds: [u8; 2]
 }
 
-impl RngSM64 {
-    pub fn new() -> RngSM64 {
-        RngSM64 {
+impl Rng {
+    pub fn new() -> Rng {
+        Rng {
             seeds: seeds(),
         }
     }

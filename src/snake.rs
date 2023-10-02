@@ -29,7 +29,7 @@ pub struct Game {
     frame: u32,
     tick: u32,
 
-    rng: rng::RngSM64,
+    rng: rng::Rng,
     last_tick: TickResult<String, String>,
 }
 
@@ -71,7 +71,7 @@ impl Game {
             frame: 0,
             tick: 0,
 
-            rng: rng::RngSM64::new(),
+            rng: rng::Rng::new(),
             last_tick: TickResult::Continue,
         };
         let _ = game.new_food(); // rng will be consistent if i call it here
