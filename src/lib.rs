@@ -49,7 +49,7 @@ pub fn main(_: i32, _: i32) -> i32 {
     vdp::depth_func(vdp::Compare::LessOrEqual);
     
     unsafe {
-        GAME = Some(snake::Game::new(10, 10, 3, 4, 8));
+        GAME = Some(snake::Game::new(12, 12, 3, 4, 8));
         CONTROLLER = Some(gamepad::Gamepad::new(gamepad::GamepadSlot::SlotA));
     }
 

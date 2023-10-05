@@ -77,7 +77,7 @@ impl Game {
             state_floaty,
             floaty_camera: FloatyCamera::new(&mut rng,
                 vec3(5.0, 5.0, 1.0),
-                vec3(0.15, 0.05, 0.08),
+                vec3(0.15, 0.05, 0.1),
                 10 * 60, 25 * 60,
                 0, 15 * 60
             ),
@@ -106,7 +106,7 @@ impl Game {
         self.head = [self.width/2, self.height/2];
         self.interval_frame = 0;
         self.frame = 0;
-        self.tick = 0;
+        // self.tick = 0;
         self.last_tick = TickResult::Continue;
         self.table = Vec::with_capacity((self.width * self.height).into());
         for _ in 0..self.width*self.height {
