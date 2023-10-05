@@ -15,7 +15,7 @@ fn tick() {
     let controller = unsafe { CONTROLLER.as_mut().unwrap() };
 
     // this uses the controller only, can i use keyboard?
-    if controller.is_connected() {
+    // if controller.is_connected() {
         let state = controller.read_state();
         let deadzone = 0.2;
 
@@ -31,7 +31,7 @@ fn tick() {
             game.set_direction(dir);
         }
 
-    }
+    // }
 
     match game.tick() {
         snake::TickResult::Win(_msg) => {
