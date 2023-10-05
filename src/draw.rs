@@ -6,6 +6,7 @@ use dbsdk_rs::math::{Vector4, Matrix4x4, Vector3, Quaternion};
 
 use geometry::cube::Cube;
 
+use crate::geometry::bodyCube::BodyCube;
 use crate::geometry::floaty::{StateFloaty, FloatyCameraOffsets};
 use crate::geometry::square::Square;
 use crate::geometry::weight::{CENTER, self};
@@ -84,7 +85,7 @@ pub fn body_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: f32, z: f32
     let scale = vec3_from(if head { 0.95 } else { 0.85 } * scale);
     let color = if head { Vector4::new(0.4, 1.0, 0.4, 1.0) } else { Vector4::new(0.0, 1.0, 0.0, 1.0) };
 
-    let c = Cube::new(from, to, scale, color, weight::Z1);
+    let c = BodyCube::new(from, to, scale, color, weight::Z1, 0.6, 0.4);
     other.append(&mut c.tris());
 }
 

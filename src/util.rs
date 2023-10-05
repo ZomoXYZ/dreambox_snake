@@ -29,3 +29,7 @@ pub fn vec3_rand(rng: &mut Rng, min: i16, max: i16) -> Vector3 {
         (rng.random_single((max - min).abs() as u16) as i16 + min) as f32
     )
 }
+
+pub fn vec4(x: f32, y: f32, z: f32, w: f32) -> Vector4 {
+    Vector4::new(x, y, z, w)
+}

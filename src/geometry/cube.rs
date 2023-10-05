@@ -1,16 +1,16 @@
 use dbsdk_rs::{math::{Vector4, Vector3}, vdp};
 use util::{min, max};
 
-use crate::util::vec3;
+use crate::util::{vec3, vec4};
 
 use super::weight::scale;
 
 pub struct Cube {
-    from: Vector3,
-    to: Vector3,
-    scale: Vector3,
-    color: Vector4,
-    weight: Vector3
+    pub from: Vector3,
+    pub to: Vector3,
+    pub scale: Vector3,
+    pub color: Vector4,
+    pub weight: Vector3
 }
 
 impl Cube {
@@ -32,19 +32,30 @@ impl Cube {
         }
     }
 
-    fn get_corners(&self) -> [Vector4; 8] {
+    pub fn get_raw_corners(&self) -> [Vector3; 2] {
         let mut s = vec![self.from, self.to];
         scale(&mut s, self.scale, self.weight);
+        [
+            s[0],
+            s[1]
+        ]
+    }
+    
+    pub fn get_corners(&self) -> [Vector4; 8] {
+        let s = self.get_raw_corners();
 
         [
-            Vector4::new(s[0].x, s[0].y, s[0].z, 1.0),
-            Vector4::new(s[1].x, s[0].y, s[0].z, 1.0),
-            Vector4::new(s[1].x, s[1].y, s[0].z, 1.0),
-            Vector4::new(s[0].x, s[1].y, s[0].z, 1.0),
-            Vector4::new(s[0].x, s[0].y, s[1].z, 1.0),
-            Vector4::new(s[1].x, s[0].y, s[1].z, 1.0),
-            Vector4::new(s[1].x, s[1].y, s[1].z, 1.0),
-            Vector4::new(s[0].x, s[1].y, s[1].z, 1.0),
+            // z-
+            vec4(s[0].x, s[0].y, s[0].z, 1.0),
+            vec4(s[1].x, s[0].y, s[0].z, 1.0),
+            vec4(s[1].x, s[1].y, s[0].z, 1.0),
+            vec4(s[0].x, s[1].y, s[0].z, 1.0),
+
+            // z+
+            vec4(s[0].x, s[0].y, s[1].z, 1.0),
+            vec4(s[1].x, s[0].y, s[1].z, 1.0),
+            vec4(s[1].x, s[1].y, s[1].z, 1.0),
+            vec4(s[0].x, s[1].y, s[1].z, 1.0),
         ]
     }
 
