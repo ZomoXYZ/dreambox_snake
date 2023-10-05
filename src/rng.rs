@@ -48,6 +48,12 @@ impl Rng {
         (((num[0] as u16) << 8) | num[1] as u16) % max
     }
 
+    pub fn random_single_u32(&mut self, max: u32) -> u32 {
+        let num0 = self.next();
+        let num1 = self.next();
+        (((num0[0] as u32) << 24) | ((num0[1] as u32) << 16) | ((num1[0] as u32) << 8) | num1[1] as u32) % max
+    }
+
     fn tick(&mut self) {
         self.seeds[0] = self.seeds[0].wrapping_mul(5).wrapping_add(1);
 

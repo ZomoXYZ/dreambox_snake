@@ -4,7 +4,7 @@ use dbsdk_rs::{vdp, math::Vector4};
 use rng;
 use draw;
 
-use crate::{util::{vec3, vec3_rand, vec3_from}, geometry::floaty::StateFloaty};
+use crate::{util::{vec3, vec3_rand, vec3_from}, geometry::floaty::{StateFloaty, FloatyCamera}};
 
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -20,6 +20,7 @@ pub struct Game {
     table: Vec<i16>,
 
     state_floaty: Vec<StateFloaty>,
+    floaty_camera: FloatyCamera,
     
     pub size: u16,
     last_direction: Direction,
@@ -74,6 +75,12 @@ impl Game {
             table,
 
             state_floaty,
+            floaty_camera: FloatyCamera::new(&mut rng,
+                vec3(5.0, 5.0, 1.0),
+                vec3(0.15, 0.05, 0.08),
+                10 * 60, 25 * 60,
+                0, 15 * 60
+            ),
             
             size: 1,
             last_direction: Direction::Right,
@@ -138,24 +145,6 @@ impl Game {
         }
         Location::Empty
     }
-
-    // pub fn get_state_floaty(&self, side: Direction, spot: u8) -> StateFloaty {
-    //     match side {
-    //         Direction::Up => self.state_floaty[spot as usize],
-    //         Direction::Down => self.state_floaty[(self.width + spot) as usize],
-    //         Direction::Left => self.state_floaty[(2*self.width + spot) as usize],
-    //         Direction::Right => self.state_floaty[(2*self.width + self.height + spot) as usize],
-    //     }
-    // }
-    // pub fn set_state_floaty(&mut self, side: Direction, spot: u8, val: StateFloaty) {
-    //     match side {
-    //         Direction::Up => self.state_floaty[spot as usize] = val,
-    //         Direction::Down => self.state_floaty[(self.width + spot) as usize] = val,
-    //         Direction::Left => self.state_floaty[(2*self.width + spot) as usize] = val,
-    //         Direction::Right => self.state_floaty[(2*self.width + self.height + spot) as usize] = val,
-    //     }
-    // }
-
 
     fn get_state_floaty_index(&self, x: i8, y: i8) -> usize {
         let x = (x + 1) as u8;
@@ -355,6 +344,7 @@ impl Game {
             }
         }
         
-        draw::transform_draw_tris(&mut tris, self.frame, self.tick)
+        let cam_offsets = self.floaty_camera.offsets((self.tick as f32) / (self.interval_frames as f32));
+        draw::transform_draw_tris(&mut tris, cam_offsets)
     }
 }

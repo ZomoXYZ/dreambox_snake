@@ -6,21 +6,24 @@ use dbsdk_rs::math::{Vector4, Matrix4x4, Vector3, Quaternion};
 
 use geometry::cube::Cube;
 
-use crate::geometry::floaty::{floaty, StateFloaty};
+use crate::geometry::floaty::{StateFloaty, FloatyCameraOffsets};
 use crate::geometry::square::Square;
 use crate::geometry::weight::{CENTER, self};
 use crate::util::{vec3_from, vec3};
 
-pub fn transform_draw_tris(tris: &mut Vec<vdp::Vertex>, _frame: u32, _tick: u32) {
+pub fn transform_draw_tris(tris: &mut Vec<vdp::Vertex>, camera_offset: FloatyCameraOffsets) {
     Matrix4x4::load_identity_simd();
 
-    let rotation = Matrix4x4::rotation(Quaternion::new(-0.34, 0.0, 0.05, 1.0));
+    // let rotation = Matrix4x4::rotation(Quaternion::new(-0.34 + camera_offset.rotation.x, 0.0 + camera_offset.rotation.y, 0.05 + camera_offset.rotation.z, 1.0));
+    // let rotation = Matrix4x4::rotation(Quaternion::new(-0.24, 0.0, 0.05, 1.0));
+    let rotation = Matrix4x4::rotation(Quaternion::new(-0.24 + camera_offset.rotation.x, 0.0 + camera_offset.rotation.y, 0.05 + camera_offset.rotation.z, 1.0));
     Matrix4x4::mul_simd(&rotation);
 
     let scale = Matrix4x4::scale(vec3_from(40.0));
     Matrix4x4::mul_simd(&scale);
 
-    let position = Matrix4x4::translation(Vector3::new(-20.0, -20.0, -40.0));
+    // let position = Matrix4x4::translation(Vector3::new(-18.0, -18.0, -40.0));
+    let position = Matrix4x4::translation(Vector3::new(-18.0, -18.0, -40.0) + camera_offset.translation);
     Matrix4x4::mul_simd(&position);
 
     let projection = Matrix4x4::projection_perspective(640.0 / 480.0, 1.0, 0.1, 200.0);
@@ -59,11 +62,11 @@ pub fn food_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32,
         (y + 1.0) * size,
         (z + 1.0) * size
     );
-    let scale = vec3_from(1.0 / 3.0);
+    let scale = 1.0 / 3.0;
     let color = Vector4::new(1.0, 0.0, 0.0, 1.0);
 
-    let c = Cube::new(from, to, scale, color, weight::CENTER);
-    let mut verts = floaty(c.tris(), state_floaty, size / 6.0);  // size/2 * scale
+    let c = Cube::new(from, to, vec3_from(scale), color, weight::CENTER);
+    let mut verts = state_floaty.float(c.tris(), size * scale);
     other.append(&mut verts);
 }
 
@@ -96,10 +99,10 @@ pub fn body_prediction_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: 
         (y + 1.0) * size,
         (z + 1.0) * size
     );
-    let scale: Vector3 = vec3_from(0.5);
+    let scale = 0.5;
     let color = if head { Vector4::new(0.4, 1.0, 0.4, 1.0) } else { Vector4::new(0.0, 1.0, 0.0, 1.0) };
 
-    let c = Cube::new(from, to, scale, color, weight);
-    let mut verts = floaty(c.tris(), state_floaty, size / 4.0); // size/2 * scale
+    let c = Cube::new(from, to, vec3_from(scale), color, weight);
+    let mut verts = state_floaty.float(c.tris(), size * scale);
     other.append(&mut verts);
 }
