@@ -17,16 +17,20 @@ fn tick() {
     // this uses the controller only, can i use keyboard?
     if controller.is_connected() {
         let state = controller.read_state();
+        let deadzone = 0.2;
 
-        if state.button_mask.contains(gamepad::GamepadButton::Up) {
-            game.set_direction(snake::Direction::Up);
-        } else if state.button_mask.contains(gamepad::GamepadButton::Down) {
-            game.set_direction(snake::Direction::Down);
-        } else if state.button_mask.contains(gamepad::GamepadButton::Left) {
-            game.set_direction(snake::Direction::Left);
-        } else if state.button_mask.contains(gamepad::GamepadButton::Right) {
-            game.set_direction(snake::Direction::Right);
+        let gamepad = util::read_gamepad(state);
+        let left_stick = util::read_deadzone(deadzone, state.left_stick_x, state.left_stick_y);
+        let right_stick = util::read_deadzone(deadzone, state.right_stick_x, state.right_stick_y);
+        
+        if let Some(dir) = gamepad {
+            game.set_direction(dir);
+        } else if let Some(dir) = left_stick {
+            game.set_direction(dir);
+        } else if let Some(dir) = right_stick {
+            game.set_direction(dir);
         }
+
     }
 
     match game.tick() {
