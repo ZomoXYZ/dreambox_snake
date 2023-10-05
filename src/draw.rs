@@ -6,7 +6,7 @@ use dbsdk_rs::math::{Vector4, Matrix4x4, Vector3, Quaternion};
 
 use geometry::cube::Cube;
 
-use crate::geometry::bodyCube::BodyCube;
+use crate::geometry::body_cube::BodyCube;
 use crate::geometry::floaty::{StateFloaty, FloatyCameraOffsets};
 use crate::geometry::square::Square;
 use crate::geometry::weight::{CENTER, self};
@@ -15,15 +15,12 @@ use crate::util::{vec3_from, vec3};
 pub fn transform_draw_tris(tris: &mut Vec<vdp::Vertex>, camera_offset: FloatyCameraOffsets) {
     Matrix4x4::load_identity_simd();
 
-    // let rotation = Matrix4x4::rotation(Quaternion::new(-0.34 + camera_offset.rotation.x, 0.0 + camera_offset.rotation.y, 0.05 + camera_offset.rotation.z, 1.0));
-    // let rotation = Matrix4x4::rotation(Quaternion::new(-0.24, 0.0, 0.05, 1.0));
     let rotation = Matrix4x4::rotation(Quaternion::new(-0.24 + camera_offset.rotation.x, 0.0 + camera_offset.rotation.y, 0.05 + camera_offset.rotation.z, 1.0));
     Matrix4x4::mul_simd(&rotation);
 
     let scale = Matrix4x4::scale(vec3_from(40.0));
     Matrix4x4::mul_simd(&scale);
 
-    // let position = Matrix4x4::translation(Vector3::new(-18.0, -18.0, -40.0));
     let position = Matrix4x4::translation(Vector3::new(-18.0, -18.0, -40.0) + camera_offset.translation);
     Matrix4x4::mul_simd(&position);
 
