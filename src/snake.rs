@@ -4,7 +4,7 @@ use dbsdk_rs::{vdp, math::Vector4};
 use rng;
 use draw;
 
-use crate::util::vec3;
+use crate::{util::{vec3, vec3_rand, vec3_from}, geometry::floaty::StateFloaty};
 
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -18,6 +18,8 @@ pub struct Game {
     pub width: u8,
     pub height: u8,
     table: Vec<i16>,
+
+    state_floaty: Vec<StateFloaty>,
     
     pub size: u16,
     last_direction: Direction,
@@ -50,16 +52,28 @@ pub enum Location {
 
 impl Game {
     pub fn new(width: u8, height: u8, left: u8, top: u8, interval_frames: u32) -> Game {
+        let mut rng = rng::Rng::new();
+
         let mut table = Vec::with_capacity((width * height).into());
         for _ in 0..width*height {
             table.push(0);
         }
 
+        let mut state_floaty = Vec::with_capacity(((width+2)*(height+2)).into());
+        for _ in 0..(width+2)*(height+2) {
+            state_floaty.push(StateFloaty::new(
+                vec3_rand(&mut rng, 90, 240),
+                vec3_rand(&mut rng, 0, 120),
+                vec3_from(0.3)
+            ));
+        }
 
         let mut game = Game {
             width,
             height,
             table,
+
+            state_floaty,
             
             size: 1,
             last_direction: Direction::Right,
@@ -71,7 +85,7 @@ impl Game {
             frame: 0,
             tick: 0,
 
-            rng: rng::Rng::new(),
+            rng,
             last_tick: TickResult::Continue,
         };
         let _ = game.new_food(); // rng will be consistent if i call it here
@@ -123,6 +137,38 @@ impl Game {
             return Location::Body(val as u16)
         }
         Location::Empty
+    }
+
+    // pub fn get_state_floaty(&self, side: Direction, spot: u8) -> StateFloaty {
+    //     match side {
+    //         Direction::Up => self.state_floaty[spot as usize],
+    //         Direction::Down => self.state_floaty[(self.width + spot) as usize],
+    //         Direction::Left => self.state_floaty[(2*self.width + spot) as usize],
+    //         Direction::Right => self.state_floaty[(2*self.width + self.height + spot) as usize],
+    //     }
+    // }
+    // pub fn set_state_floaty(&mut self, side: Direction, spot: u8, val: StateFloaty) {
+    //     match side {
+    //         Direction::Up => self.state_floaty[spot as usize] = val,
+    //         Direction::Down => self.state_floaty[(self.width + spot) as usize] = val,
+    //         Direction::Left => self.state_floaty[(2*self.width + spot) as usize] = val,
+    //         Direction::Right => self.state_floaty[(2*self.width + self.height + spot) as usize] = val,
+    //     }
+    // }
+
+
+    fn get_state_floaty_index(&self, x: i8, y: i8) -> usize {
+        let x = (x + 1) as u8;
+        let y = (y + 1) as u8;
+        if x >= (self.width + 2) || y >= (self.height + 2) {
+            return 0
+        }
+        (y as usize) * ((self.width + 2) as usize) + (x as usize)
+    }
+    pub fn tick_state_floaty(&mut self, x: i8, y: i8) -> StateFloaty {
+        let index = self.get_state_floaty_index(x, y);
+        self.state_floaty[index].tick();
+        self.state_floaty[index]
     }
 
     fn get_index(&self, x: u8, y: u8) -> usize {
@@ -244,7 +290,7 @@ impl Game {
         TickResult::Continue
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         vdp::clear_color(vdp::Color32::new(0, 0, 0, 255));
         vdp::clear_depth(1.0);
 
@@ -260,16 +306,20 @@ impl Game {
                         let scale = if self.size == 1 { 0.6 } else if self.size == 2 { 0.6 } else if self.size == 3 { 0.8 } else { 1.0 };
                         draw::body_box(&mut tris, true, x as f32, y as f32, 0.0, size, scale);
                         if x == 0 {
-                            draw::body_prediction_box(&mut tris, true, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0));
+                            let state_floaty = self.tick_state_floaty(self.width as i8, y as i8);
+                            draw::body_prediction_box(&mut tris, true, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0), state_floaty);
                         }
                         if y == 0 {
-                            draw::body_prediction_box(&mut tris, true, x as f32, self.height as f32, 0.0, size, vec3(0.5, 0.0, 0.0));
+                            let state_floaty = self.tick_state_floaty(x as i8, self.height as i8);
+                            draw::body_prediction_box(&mut tris, true, x as f32, self.height as f32, 0.0, size, vec3(0.5, 0.0, 0.0), state_floaty);
                         }
                         if x == self.width - 1 {
-                            draw::body_prediction_box(&mut tris, true, -1.0, y as f32, 0.0, size, vec3(1.0, 0.5, 0.0));
+                            let state_floaty = self.tick_state_floaty(-1, y as i8);
+                            draw::body_prediction_box(&mut tris, true, -1.0, y as f32, 0.0, size, vec3(1.0, 0.5, 0.0), state_floaty);
                         }
                         if y == self.height - 1 {
-                            draw::body_prediction_box(&mut tris, true, x as f32, -1.0, 0.0, size, vec3(0.5, 1.0, 0.0));
+                            let state_floaty = self.tick_state_floaty(x as i8, -1);
+                            draw::body_prediction_box(&mut tris, true, x as f32, -1.0, 0.0, size, vec3(0.5, 1.0, 0.0), state_floaty);
                         }
                     }
                     Location::Body(val) => {
@@ -277,21 +327,26 @@ impl Game {
                         let scale: f32 = if val == 1 { 0.4 } else if val == 2 { 0.65 } else if val == 3 { 0.9 } else { 1.0 };
                         draw::body_box(&mut tris, false, x as f32, y as f32, 0.0, size, scale);
                         if x == 0 {
-                            draw::body_prediction_box(&mut tris, false, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0));
+                            let state_floaty = self.tick_state_floaty(self.width as i8, y as i8);
+                            draw::body_prediction_box(&mut tris, false, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0), state_floaty);
                         }
                         if y == 0 {
-                            draw::body_prediction_box(&mut tris, false, x as f32, self.height as f32, 0.0, size, vec3(0.5, 0.0, 0.0));
+                            let state_floaty = self.tick_state_floaty(x as i8, self.height as i8);
+                            draw::body_prediction_box(&mut tris, false, x as f32, self.height as f32, 0.0, size, vec3(0.5, 0.0, 0.0), state_floaty);
                         }
                         if x == self.width - 1 {
-                            draw::body_prediction_box(&mut tris, false, -1.0, y as f32, 0.0, size, vec3(1.0, 0.5, 0.0));
+                            let state_floaty = self.tick_state_floaty(-1, y as i8);
+                            draw::body_prediction_box(&mut tris, false, -1.0, y as f32, 0.0, size, vec3(1.0, 0.5, 0.0), state_floaty);
                         }
                         if y == self.height - 1 {
-                            draw::body_prediction_box(&mut tris, false, x as f32, -1.0, 0.0, size, vec3(0.5, 1.0, 0.0));
+                            let state_floaty = self.tick_state_floaty(x as i8, -1);
+                            draw::body_prediction_box(&mut tris, false, x as f32, -1.0, 0.0, size, vec3(0.5, 1.0, 0.0), state_floaty);
                         }
                     }
                     Location::Food => {
                         draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
-                        draw::food_box(&mut tris, x as f32, y as f32, 0.0, size);
+                        let state_floaty = self.tick_state_floaty(x as i8, y as i8);
+                        draw::food_box(&mut tris, x as f32, y as f32, 0.0, size, state_floaty);
                     }
                     Location::Empty => {
                         draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.25, 0.25, 0.25, 1.0));

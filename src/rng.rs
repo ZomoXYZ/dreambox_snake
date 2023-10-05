@@ -23,15 +23,29 @@ impl Rng {
         }
     }
 
-    pub fn random(&mut self, max: u8) -> [u8; 2] {
+    pub fn next(&mut self) -> [u8; 2] {
         let mut num: [u8; 2] = [0, 0];
 
         self.tick();
-        num[0] = (self.seeds[0] ^ self.seeds[1]) % max;
+        num[0] = self.seeds[0] ^ self.seeds[1];
         self.tick();
-        num[1] = (self.seeds[0] ^ self.seeds[1]) % max;
+        num[1] = self.seeds[0] ^ self.seeds[1];
 
         num
+    }
+
+    pub fn random(&mut self, max: u8) -> [u8; 2] {
+        let mut num = self.next();
+
+        num[0] = num[0] % max;
+        num[1] = num[1] % max;
+
+        num
+    }
+
+    pub fn random_single(&mut self, max: u16) -> u16 {
+        let num = self.next();
+        (((num[0] as u16) << 8) | num[1] as u16) % max
     }
 
     fn tick(&mut self) {

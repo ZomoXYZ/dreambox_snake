@@ -48,6 +48,7 @@ impl Cube {
         ]
     }
 
+    // should be a trait
     pub fn tris(&self) -> Vec<vdp::Vertex> {
         let corners = self.get_corners();
         let mut tris = Vec::new();

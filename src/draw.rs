@@ -6,6 +6,7 @@ use dbsdk_rs::math::{Vector4, Matrix4x4, Vector3, Quaternion};
 
 use geometry::cube::Cube;
 
+use crate::geometry::floaty::{floaty, StateFloaty};
 use crate::geometry::square::Square;
 use crate::geometry::weight::{CENTER, self};
 use crate::util::{vec3_from, vec3};
@@ -47,7 +48,7 @@ pub fn floor_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32
     other.append(&mut square.tris());
 }
 
-pub fn food_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32) {
+pub fn food_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32, state_floaty: StateFloaty) {
     let from = vec3(
         x * size,
         y * size,
@@ -62,7 +63,8 @@ pub fn food_box(other: &mut Vec<vdp::Vertex>, x: f32, y: f32, z: f32, size: f32)
     let color = Vector4::new(1.0, 0.0, 0.0, 1.0);
 
     let c = Cube::new(from, to, scale, color, weight::CENTER);
-    other.append(&mut c.tris());
+    let mut verts = floaty(c.tris(), state_floaty, size / 6.0);  // size/2 * scale
+    other.append(&mut verts);
 }
 
 pub fn body_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: f32, z: f32, size: f32, scale: f32) {
@@ -83,7 +85,7 @@ pub fn body_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: f32, z: f32
     other.append(&mut c.tris());
 }
 
-pub fn body_prediction_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: f32, z: f32, size: f32, weight: Vector3) {
+pub fn body_prediction_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: f32, z: f32, size: f32, weight: Vector3, state_floaty: StateFloaty) {
     let from = vec3(
         x * size,
         y * size,
@@ -98,5 +100,6 @@ pub fn body_prediction_box(other: &mut Vec<vdp::Vertex>, head: bool, x: f32, y: 
     let color = if head { Vector4::new(0.4, 1.0, 0.4, 1.0) } else { Vector4::new(0.0, 1.0, 0.0, 1.0) };
 
     let c = Cube::new(from, to, scale, color, weight);
-    other.append(&mut c.tris());
+    let mut verts = floaty(c.tris(), state_floaty, size / 4.0); // size/2 * scale
+    other.append(&mut verts);
 }
