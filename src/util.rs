@@ -58,15 +58,15 @@ pub fn read_deadzone(deadzone: f32, x: i16, y: i16) -> Option<Direction> {
 }
 
 pub fn read_gamepad(state: GamepadState) -> Option<Direction> {
-        if state.button_mask.contains(GamepadButton::Up) {
-            Some(Direction::Up)
-        } else if state.button_mask.contains(GamepadButton::Down) {
-            Some(Direction::Down)
-        } else if state.button_mask.contains(GamepadButton::Left) {
-            Some(Direction::Left)
-        } else if state.button_mask.contains(GamepadButton::Right) {
-            Some(Direction::Right)
-        } else {
-            None
-        }
+    if state.button_mask.contains(GamepadButton::Up) {
+        Some(Direction::Up)
+    } else if state.button_mask.contains(GamepadButton::Down) {
+        Some(Direction::Down)
+    } else if state.button_mask.contains(GamepadButton::Left) {
+        Some(Direction::Left)
+    } else if state.button_mask.contains(GamepadButton::Right) {
+        Some(Direction::Right)
+    } else {
+        None
+    }
 }

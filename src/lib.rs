@@ -14,7 +14,7 @@ fn tick() {
     let game = unsafe { GAME.as_mut().unwrap() };
     let controller = unsafe { CONTROLLER.as_mut().unwrap() };
 
-    // this uses the controller only, can i use keyboard?
+    // if this is uncommented the game will only work if an actual controller is connected, a keyboard doesn't count
     // if controller.is_connected() {
         let state = controller.read_state();
         let deadzone = 0.2;
@@ -30,14 +30,16 @@ fn tick() {
         } else if let Some(dir) = right_stick {
             game.set_direction(dir);
         }
-
     // }
 
     match game.tick() {
         snake::TickResult::Win(_msg) => {
-            
+            // no win screen yet
+            // no reset so the game will intentionally hang here
+            game.draw();
         }
         snake::TickResult::Lose(_msg) => {
+            // no lose screen yet
             game.reset();
         }
         snake::TickResult::Continue => {
@@ -52,6 +54,7 @@ pub fn main(_: i32, _: i32) -> i32 {
     vdp::depth_write(true);
     vdp::depth_func(vdp::Compare::LessOrEqual);
     
+    // unsafe so we can initialize the game and controller here and use them in the tick function
     unsafe {
         GAME = Some(snake::Game::new(12, 12, 3, 4, 8));
         CONTROLLER = Some(gamepad::Gamepad::new(gamepad::GamepadSlot::SlotA));

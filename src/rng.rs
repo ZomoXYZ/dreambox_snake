@@ -11,6 +11,10 @@ pub fn seeds() -> [u8; 2] {
 /*
 sm64 rng
 https://youtu.be/q15yNrJHOak?t=292
+
+note
+    sm64's rng implementation will return 2 u8 numbers, which is why `next` and `random` return [u8; 2]
+    the second number can be discarded if you only need 1 number
 */
 pub struct Rng {
     seeds: [u8; 2]
@@ -23,6 +27,7 @@ impl Rng {
         }
     }
 
+    // 2 u8 numbers
     pub fn next(&mut self) -> [u8; 2] {
         let mut num: [u8; 2] = [0, 0];
 
@@ -34,6 +39,7 @@ impl Rng {
         num
     }
 
+    // 2 u8 numbers between 0 and max
     pub fn random(&mut self, max: u8) -> [u8; 2] {
         let mut num = self.next();
 
@@ -43,11 +49,13 @@ impl Rng {
         num
     }
 
+    // combine 2 u8 numbers into 1 u16 number between 0 and max
     pub fn random_single(&mut self, max: u16) -> u16 {
         let num = self.next();
         (((num[0] as u16) << 8) | num[1] as u16) % max
     }
 
+    // combine 4 u8 numbers into 1 u32 number between 0 and max
     pub fn random_single_u32(&mut self, max: u32) -> u32 {
         let num0 = self.next();
         let num1 = self.next();

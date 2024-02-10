@@ -212,8 +212,6 @@ impl Game {
         let result = self.tick_internal();
         self.last_tick = result.clone();
         result
-
-        // TickResult::Continue
     }
 
     fn tick_internal(&mut self) -> TickResult<String, String> {
@@ -287,13 +285,17 @@ impl Game {
 
         let size = 1.0 / (max(self.width, self.height) as f32);
 
+        // loop through the game grid
         for x in 0..self.width {
             for y in 0..self.height {
+
                 match self.at(x, y) {
                     Location::Head(_) => {
                         draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
+                        
                         let scale = if self.size == 1 { 0.6 } else if self.size == 2 { 0.6 } else if self.size == 3 { 0.8 } else { 1.0 };
                         draw::body_box(&mut tris, true, x as f32, y as f32, 0.0, size, scale);
+                        
                         if x == 0 {
                             let state_floaty = self.tick_state_floaty(self.width as i8, y as i8);
                             draw::body_prediction_box(&mut tris, true, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0), state_floaty);
@@ -313,8 +315,10 @@ impl Game {
                     }
                     Location::Body(val) => {
                         draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
+                        
                         let scale: f32 = if val == 1 { 0.4 } else if val == 2 { 0.65 } else if val == 3 { 0.9 } else { 1.0 };
                         draw::body_box(&mut tris, false, x as f32, y as f32, 0.0, size, scale);
+                        
                         if x == 0 {
                             let state_floaty = self.tick_state_floaty(self.width as i8, y as i8);
                             draw::body_prediction_box(&mut tris, false, self.width as f32, y as f32, 0.0, size, vec3(0.0, 0.5, 0.0), state_floaty);
@@ -334,6 +338,7 @@ impl Game {
                     }
                     Location::Food => {
                         draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.15, 0.15, 0.15, 1.0));
+                        
                         let state_floaty = self.tick_state_floaty(x as i8, y as i8);
                         draw::food_box(&mut tris, x as f32, y as f32, 0.0, size, state_floaty);
                     }
@@ -341,6 +346,7 @@ impl Game {
                         draw::floor_box(&mut tris, x as f32, y as f32, 0.0, size, Vector4::new(0.25, 0.25, 0.25, 1.0));
                     }
                 }
+
             }
         }
         
